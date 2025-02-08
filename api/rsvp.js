@@ -9,9 +9,6 @@ app.use(express.json());
 // app.use(cors());
 const port = 3000;
 
-
-const cors = require('cors');
-
 // Permitir solicitudes desde tu frontend
 app.use(cors({
   origin: 'https://nuestrabodalym.netlify.app',  // Permitir solo este dominio
