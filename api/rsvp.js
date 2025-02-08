@@ -39,8 +39,14 @@ app.post("/api/rsvp", async (req, res) => {
   res.status(200).json({ mensaje: "Confirmación registrada correctamente" });
 });
 
-app.get('/api/rsvp', (req, res) => {
-    res.json({ message: "RSVP endpoint" });
+app.get('/api/rsvp', async (req, res) => {
+  const { data, error } = await supabase.from("invitados").select("*");
+
+  if (error) {
+    return res.status(500).json({ mensaje: "Error al obtener datos", error });
+  }
+
+  res.status(200).json(data);
   });
   
 
