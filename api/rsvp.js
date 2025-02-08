@@ -21,28 +21,28 @@ const supabase = createClient(
 );
 
 app.post("/api/rsvp", async (req, res) => {
-  const { nombre, email, asistencia } = req.body;
+  const { nombre, email, asistencia, adultos, ninos } = req.body;
   console.log(req.body);
+
+  
+  if (!nombre || !email || asistencia === undefined) {
+    console.log(req.body);
+    return res.status(400).json({ mensaje: "Todos los campos son obligatorios" });
+  }
+  
+  const { data, error } = await supabase
+  .from("invitados")
+  .insert([{ nombre, email, asistencia, adultos, ninos }]);
+  
+  if (error) return res.status(500).json({ mensaje: "Error al guardar en la BD", error });
+  
+  res.status(200).json({ mensaje: "Confirmación registrada correctamente" });
+});
 
 app.get('/api/rsvp', (req, res) => {
     res.json({ message: "RSVP endpoint" });
   });
   
-
-  if (!nombre || !email || asistencia === undefined) {
-    console.log(req.body);
-    return res.status(400).json({ mensaje: "Todos los campos son obligatorios" });
-  }
-
-  const { data, error } = await supabase
-    .from("invitados")
-    .insert([{ nombre, email, asistencia }]);
-
-  if (error) return res.status(500).json({ mensaje: "Error al guardar en la BD", error });
-
-  res.status(200).json({ mensaje: "Confirmación registrada correctamente" });
-});
-
 
 // Iniciar el servidor
 app.listen(port, () => {
