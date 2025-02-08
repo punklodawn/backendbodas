@@ -6,12 +6,12 @@ yarn-error.log*
 package-lock.json
 
 # Entornos y configuración
-.env
-.env.local
-.env.development
-.env.production
-.env.test
-.vercel
+# .env
+# .env.local
+# .env.development
+# .env.production
+# .env.test
+# .vercel
 
 # Caché y logs
 logs
