@@ -26,6 +26,10 @@ const supabase = createClient(
 app.post("/api/rsvp", async (req, res) => {
   const { nombre, email, asistencia } = req.body;
   console.log(req.body);
+
+app.get('/api/rsvp', (req, res) => {
+    res.json({ message: "RSVP endpoint" });
+  });
   
 
   if (!nombre || !email || asistencia === undefined) {
