@@ -1,0 +1,35 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Entornos y configuración
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+.vercel
+
+# Caché y logs
+logs
+*.log
+yarn.lock
+.pnpm-debug.log*
+.DS_Store
+Thumbs.db
+
+# Archivos de compilación
+dist/
+build/
+out/
+
+# Archivos de depuración
+*.swp
+*.swo
+
+# Archivos de dependencias locales
+.vscode/
+.idea/

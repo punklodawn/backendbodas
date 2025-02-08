@@ -1,0 +1,42 @@
+import express from "express";
+import cors from "cors";
+import { createClient } from "@supabase/supabase-js";
+import dotenv from "dotenv";
+
+dotenv.config();
+const app = express();
+app.use(express.json());
+app.use(cors());
+const port = 3000;
+
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_KEY
+);
+
+app.post("/api/rsvp", async (req, res) => {
+  const { nombre, email, asistencia } = req.body;
+  console.log(req.body);
+  
+
+  if (!nombre || !email || asistencia === undefined) {
+    console.log(req.body);
+    return res.status(400).json({ mensaje: "Todos los campos son obligatorios" });
+  }
+
+  const { data, error } = await supabase
+    .from("invitados")
+    .insert([{ nombre, email, asistencia }]);
+
+  if (error) return res.status(500).json({ mensaje: "Error al guardar en la BD", error });
+
+  res.status(200).json({ mensaje: "Confirmación registrada correctamente" });
+});
+
+
+// Iniciar el servidor
+app.listen(port, () => {
+    console.log(`Servidor corriendo en http://localhost:${port}`);
+});
+export default app;
