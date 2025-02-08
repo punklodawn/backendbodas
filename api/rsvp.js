@@ -14,7 +14,8 @@ const cors = require('cors');
 
 // Permitir solicitudes desde tu frontend
 app.use(cors({
-  origin: 'https://nuestrabodalym.netlify.app',  // Especifica tu dominio de frontend
+  origin: 'https://nuestrabodalym.netlify.app',  // Permitir solo este dominio
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],   // Especifica tu dominio de frontend
 }));
 
 const supabase = createClient(
