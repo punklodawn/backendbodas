@@ -2,15 +2,16 @@
   "name": "backend-boda",
   "version": "1.0.0",
   "type": "module",
-  "main": "rsvp.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node rsvp.js"
+    "start": "node server.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.48.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.18.2",
+    "express-validator": "^7.2.1",
     "nodemon": "^3.1.9",
     "punycode": "^2.3.1"
   }
