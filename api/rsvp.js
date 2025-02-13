@@ -11,7 +11,10 @@ const port = 3000;
 
 // Permitir solicitudes desde tu frontend
 app.use(cors({
-  origin: 'https://nuestrabodalym.netlify.app',  // Permitir solo este dominio
+  origin: [
+    'https://nuestrabodalym.netlify.app', // Producción
+    'http://localhost:5173'              // Desarrollo (Vite)
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],   // Especifica tu dominio de frontend
 }));
 
@@ -28,6 +31,21 @@ app.post("/api/rsvp", async (req, res) => {
   if (!nombre || !email || asistencia === undefined) {
     console.log(req.body);
     return res.status(400).json({ mensaje: "Todos los campos son obligatorios" });
+  }
+
+    // 🔹 1️⃣ Verificar si el email ya existe en la BD
+    const { data: existingUser, error: fetchError } = await supabase
+    .from("invitados")
+    .select("email")
+    .eq("email", email)
+    .single(); // Solo queremos un resultado
+
+  if (fetchError) {
+    return res.status(500).json({ mensaje: "Error al verificar el email", error: fetchError });
+  }
+
+  if (existingUser) {
+    return res.status(400).json({ mensaje: "Ya existe una invitación registrada con este email" });
   }
   
   const { data, error } = await supabase
