@@ -4,7 +4,9 @@
   "type": "module",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",    
+    "dev": "vercel dev",
+    "build": "vercel build"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.48.1",
