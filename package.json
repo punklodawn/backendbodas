@@ -2,9 +2,9 @@
   "name": "backend-boda",
   "version": "1.0.0",
   "type": "module",
-  "main": "server.js",
+  "main": "rsvp.js",
   "scripts": {
-    "start": "node server.js",    
+    "start": "node rsvp.js",    
     "dev": "vercel dev",
     "build": "vercel build"
   },
