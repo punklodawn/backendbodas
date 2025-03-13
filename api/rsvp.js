@@ -3,7 +3,7 @@ import cors from "cors";
 import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
 import NodeCache from "node-cache";
-import { checkAuth } from './authMiddleware';
+import { checkAuth } from './authMiddleware.js';
 
 
 dotenv.config();
