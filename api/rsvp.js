@@ -15,7 +15,9 @@ app.use(cors({
     'https://nuestrabodalym.netlify.app', // Producción
     'http://localhost:5173'              // Desarrollo (Vite)
   ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],   // Especifica tu dominio de frontend
+  methods: ["GET", "POST", "PUT", "DELETE"], // Métodos permitidos
+  allowedHeaders: ["Content-Type", "Authorization"], // Encabezados permitidos
+  credentials: true, // Permitir credenciales (si es necesario)
 }));
 
 const supabase = createClient(
@@ -24,30 +26,7 @@ const supabase = createClient(
 );
 
 
-// 🔹 Middleware para verificar el token de autenticación
-const authenticate = async (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1]; // Obtener token del header
-
-  if (!token) {
-    return res.status(401).json({ mensaje: "Acceso no autorizado. Falta token." });
-  }
-
-  // Verificar token con Supabase
-  const { data: { user }, error } = await supabase.auth.getUser(token);
-
-  if (error || !user) {
-    return res.status(401).json({ mensaje: "Token inválido o expirado.", error });
-  }
-
-  req.user = user; // Agregar usuario autenticado al request
-  next();
-};
-
-// 🔹 Ruta para verificar sesión activa (el frontend la usará)
-app.get('/api/auth/validate', authenticate, (req, res) => {
-  res.status(200).json({ mensaje: "Usuario autenticado", user: req.user });
-});
-
+app.options("*", cors());
 
 
 app.post("/api/rsvp", async (req, res) => {
