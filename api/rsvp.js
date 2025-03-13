@@ -23,6 +23,33 @@ const supabase = createClient(
   process.env.SUPABASE_KEY
 );
 
+
+// 🔹 Middleware para verificar el token de autenticación
+const authenticate = async (req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1]; // Obtener token del header
+
+  if (!token) {
+    return res.status(401).json({ mensaje: "Acceso no autorizado. Falta token." });
+  }
+
+  // Verificar token con Supabase
+  const { data: { user }, error } = await supabase.auth.getUser(token);
+
+  if (error || !user) {
+    return res.status(401).json({ mensaje: "Token inválido o expirado.", error });
+  }
+
+  req.user = user; // Agregar usuario autenticado al request
+  next();
+};
+
+// 🔹 Ruta para verificar sesión activa (el frontend la usará)
+app.get('/api/auth/validate', authenticate, (req, res) => {
+  res.status(200).json({ mensaje: "Usuario autenticado", user: req.user });
+});
+
+
+
 app.post("/api/rsvp", async (req, res) => {
   const { nombre, email, asistencia, adultos, ninos } = req.body;
   console.log(req.body);
@@ -57,7 +84,7 @@ app.post("/api/rsvp", async (req, res) => {
   res.status(200).json({ mensaje: "Confirmación registrada correctamente" });
 });
 
-app.get('/api/rsvp', async (req, res) => {
+app.get('/api/rsvp', authenticate, async (req, res) => {
   const { data, error } = await supabase.from("invitados").select("*");
 
   if (error) {
@@ -66,6 +93,51 @@ app.get('/api/rsvp', async (req, res) => {
 
   res.status(200).json(data);
   });
+
+  // Ruta para agregar un comentario
+app.post("/api/comentarios", async (req, res) => {
+  const { nombre, comentario } = req.body;
+
+  // Validar los datos
+  if (!nombre || !comentario) {
+    return res.status(400).json({ mensaje: "Nombre y comentario son obligatorios" });
+  }
+
+  try {
+    // Insertar el comentario en la base de datos y devolver el registro insertado
+    const { data, error } = await supabase
+      .from("comentarios")
+      .insert([{ nombre, comentario }])
+      .select(); // Devuelve el registro insertado
+
+    if (error) {
+      throw error;
+    }
+
+    // Devuelve el comentario recién insertado
+    res.status(201).json(data[0]);
+  } catch (error) {
+    res.status(500).json({ mensaje: "Error al agregar el comentario", error });
+  }
+});
+
+// Ruta para obtener todos los comentarios
+app.get("/api/comentarios", async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from("comentarios")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      throw error;
+    }
+
+    res.status(200).json(data|| []);
+  } catch (error) {
+    res.status(500).json({ mensaje: "Error al obtener los comentarios", error });
+  }
+});
   
 
 // Iniciar el servidor
