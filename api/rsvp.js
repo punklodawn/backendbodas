@@ -2,12 +2,16 @@ import express from "express";
 import cors from "cors";
 import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
+import NodeCache from "node-cache";
+
 
 dotenv.config();
 const app = express();
 app.use(express.json());
 // app.use(cors());
 const port = 3000;
+
+const cache = new NodeCache({ stdTTL: 300, checkperiod: 60 });
 
 // Permitir solicitudes desde tu frontend
 app.use(cors({
@@ -64,14 +68,28 @@ app.post("/api/rsvp", async (req, res) => {
 });
 
 app.get('/api/rsvp', async (req, res) => {
-  const { data, error } = await supabase.from("invitados").select("*");
 
-  if (error) {
-    return res.status(500).json({ mensaje: "Error al obtener datos", error });
+  const cacheKey = "rsvp_data";
+
+  if (cache.has(cacheKey)) {
+    console.log("Datos obtenidos de caché");
+    return res.status(200).json(cache.get(cacheKey));
   }
 
-  res.status(200).json(data);
-  });
+  try {
+    const { data, error } = await supabase.from("invitados").select("*");
+
+    if (error) {
+      return res.status(500).json({ mensaje: "Error al obtener datos", error });
+    }
+
+    cache.set(cacheKey, data);
+    console.log("Datos obtenidos de Supabase y guardados en caché");
+    res.status(200).json(data);
+  } catch (error) {
+    res.status(500).json({ mensaje: "Error al obtener datos", error });
+  }
+});
 
   // Ruta para agregar un comentario
 app.post("/api/comentarios", async (req, res) => {
@@ -102,6 +120,13 @@ app.post("/api/comentarios", async (req, res) => {
 
 // Ruta para obtener todos los comentarios
 app.get("/api/comentarios", async (req, res) => {
+  const cacheKey = "comentarios_data";
+
+  if (cache.has(cacheKey)) {
+    console.log("Comentarios obtenidos de caché");
+    return res.status(200).json(cache.get(cacheKey));
+  }
+
   try {
     const { data, error } = await supabase
       .from("comentarios")
@@ -109,10 +134,12 @@ app.get("/api/comentarios", async (req, res) => {
       .order("created_at", { ascending: false });
 
     if (error) {
-      throw error;
+      return res.status(500).json({ mensaje: "Error al obtener los comentarios", error });
     }
 
-    res.status(200).json(data|| []);
+    cache.set(cacheKey, data);
+    console.log("Comentarios obtenidos de Supabase y guardados en caché");
+    res.status(200).json(data || []);
   } catch (error) {
     res.status(500).json({ mensaje: "Error al obtener los comentarios", error });
   }
