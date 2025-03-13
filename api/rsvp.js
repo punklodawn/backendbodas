@@ -3,6 +3,7 @@ import cors from "cors";
 import { createClient } from "@supabase/supabase-js";
 import dotenv from "dotenv";
 import NodeCache from "node-cache";
+import { checkAuth } from './authMiddleware';
 
 
 dotenv.config();
@@ -167,21 +168,21 @@ app.get("/api/admin/comentarios", async (req, res) => {
   }
 });
   
-app.put("/api/admin/comentarios/:id", async (req, res) => {
+app.put("/api/admin/comentarios/:id", checkAuth, async (req, res) => {
   const { id } = req.params;
   const { aprobado } = req.body;
 
-  try {
-    const isAuthenticated = await checkAuth();
-    if (!isAuthenticated) {
-      return res.status(401).json({ mensaje: "Acceso no autorizado" });
-    }
+  console.log("Estado de aprobación:", aprobado);
 
+  try {
     const { data, error } = await supabase
       .from("comentarios")
       .update({ aprobado })
       .eq("id", id)
       .select();
+
+    console.log("Datos actualizados:", data);
+    console.log("Error:", error);
 
     if (error) {
       throw error;
@@ -189,6 +190,7 @@ app.put("/api/admin/comentarios/:id", async (req, res) => {
 
     res.status(200).json(data[0]);
   } catch (error) {
+    console.error("Error al actualizar el comentario:", error);
     res.status(500).json({ mensaje: "Error al actualizar el comentario", error });
   }
 });
