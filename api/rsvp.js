@@ -131,7 +131,6 @@ app.get("/api/comentarios", async (req, res) => {
     const { data, error } = await supabase
       .from("comentarios")
       .select("*")
-      .eq("aprobado", true)
       .order("created_at", { ascending: false });
 
     if (error) {
