@@ -4,7 +4,7 @@
   "type": "module",
   "main": "rsvp.js",
   "scripts": {
-    "start": "node rsvp.js"
+    "start": "node api/rsvp.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.48.1",
