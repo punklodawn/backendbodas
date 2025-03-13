@@ -101,17 +101,16 @@ app.post("/api/comentarios", async (req, res) => {
   }
 
   try {
-    // Insertar el comentario en la base de datos y devolver el registro insertado
+    // Insertar el comentario en la base de datos con estado "no aprobado"
     const { data, error } = await supabase
       .from("comentarios")
-      .insert([{ nombre, comentario }])
+      .insert([{ nombre, comentario, aprobado: false }])
       .select(); // Devuelve el registro insertado
 
     if (error) {
       throw error;
     }
 
-    // Devuelve el comentario recién insertado
     res.status(201).json(data[0]);
   } catch (error) {
     res.status(500).json({ mensaje: "Error al agregar el comentario", error });
@@ -131,6 +130,7 @@ app.get("/api/comentarios", async (req, res) => {
     const { data, error } = await supabase
       .from("comentarios")
       .select("*")
+      .eq("aprobado", true)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -144,7 +144,54 @@ app.get("/api/comentarios", async (req, res) => {
     res.status(500).json({ mensaje: "Error al obtener los comentarios", error });
   }
 });
+
+app.get("/api/admin/comentarios", async (req, res) => {
+  try {
+    const isAuthenticated = await checkAuth();
+    if (!isAuthenticated) {
+      return res.status(401).json({ mensaje: "Acceso no autorizado" });
+    }
+
+    const { data, error } = await supabase
+      .from("comentarios")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      throw error;
+    }
+
+    res.status(200).json(data || []);
+  } catch (error) {
+    res.status(500).json({ mensaje: "Error al obtener los comentarios", error });
+  }
+});
   
+app.put("/api/admin/comentarios/:id", async (req, res) => {
+  const { id } = req.params;
+  const { aprobado } = req.body;
+
+  try {
+    const isAuthenticated = await checkAuth();
+    if (!isAuthenticated) {
+      return res.status(401).json({ mensaje: "Acceso no autorizado" });
+    }
+
+    const { data, error } = await supabase
+      .from("comentarios")
+      .update({ aprobado })
+      .eq("id", id)
+      .select();
+
+    if (error) {
+      throw error;
+    }
+
+    res.status(200).json(data[0]);
+  } catch (error) {
+    res.status(500).json({ mensaje: "Error al actualizar el comentario", error });
+  }
+});
 
 // Iniciar el servidor
 app.listen(port, () => {
