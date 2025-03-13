@@ -36,11 +36,11 @@ app.options("*", cors());
 
 app.post("/api/rsvp", async (req, res) => {
   const { nombre, email, asistencia, adultos, ninos } = req.body;
-  console.log(req.body);
+
 
   
   if (!nombre || !email || asistencia === undefined) {
-    console.log(req.body);
+
     return res.status(400).json({ mensaje: "Todos los campos son obligatorios" });
   }
 
@@ -102,10 +102,16 @@ app.post("/api/comentarios", async (req, res) => {
   }
 
   try {
+    // Obtener la fecha y hora actual en UTC
+    const fechaUTC = new Date();
+
+    // Convertir la fecha UTC a la zona horaria de Argentina
+    const fechaArgentina = new Date(fechaUTC.toLocaleString("en-US", { timeZone: "America/Argentina/Buenos_Aires" }));
+
     // Insertar el comentario en la base de datos con estado "no aprobado"
     const { data, error } = await supabase
       .from("comentarios")
-      .insert([{ nombre, comentario, aprobado: false }])
+      .insert([{ nombre, comentario, aprobado: false , created_at: fechaArgentina }])
       .select(); // Devuelve el registro insertado
 
     if (error) {
@@ -136,13 +142,8 @@ app.get("/api/comentarios", async (req, res) => {
   }
 });
 
-app.get("/api/admin/comentarios", async (req, res) => {
+app.get('/api/admin/comentarios', checkAuth, async (req, res) => {
   try {
-    const isAuthenticated = await checkAuth();
-    if (!isAuthenticated) {
-      return res.status(401).json({ mensaje: "Acceso no autorizado" });
-    }
-
     const { data, error } = await supabase
       .from("comentarios")
       .select("*")
@@ -162,7 +163,6 @@ app.put("/api/admin/comentarios/:id", checkAuth, async (req, res) => {
   const { id } = req.params;
   const { aprobado } = req.body;
 
-  console.log("Estado de aprobación:", aprobado);
 
   try {
     const { data, error } = await supabase
@@ -170,9 +170,6 @@ app.put("/api/admin/comentarios/:id", checkAuth, async (req, res) => {
       .update({ aprobado })
       .eq("id", id)
       .select();
-
-    console.log("Datos actualizados:", data);
-    console.log("Error:", error);
 
     if (error) {
       throw error;
