@@ -120,13 +120,6 @@ app.post("/api/comentarios", async (req, res) => {
 
 // Ruta para obtener todos los comentarios
 app.get("/api/comentarios", async (req, res) => {
-  const cacheKey = "comentarios_data";
-
-  if (cache.has(cacheKey)) {
-    console.log("Comentarios obtenidos de caché");
-    return res.status(200).json(cache.get(cacheKey));
-  }
-
   try {
     const { data, error } = await supabase
       .from("comentarios")
@@ -137,8 +130,6 @@ app.get("/api/comentarios", async (req, res) => {
       return res.status(500).json({ mensaje: "Error al obtener los comentarios", error });
     }
 
-    cache.set(cacheKey, data);
-    console.log("Comentarios obtenidos de Supabase y guardados en caché");
     res.status(200).json(data || []);
   } catch (error) {
     res.status(500).json({ mensaje: "Error al obtener los comentarios", error });
