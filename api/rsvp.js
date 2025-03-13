@@ -63,7 +63,7 @@ app.post("/api/rsvp", async (req, res) => {
   res.status(200).json({ mensaje: "Confirmación registrada correctamente" });
 });
 
-app.get('/api/rsvp', authenticate, async (req, res) => {
+app.get('/api/rsvp', async (req, res) => {
   const { data, error } = await supabase.from("invitados").select("*");
 
   if (error) {
