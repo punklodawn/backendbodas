@@ -141,6 +141,28 @@ app.get("/api/comentarios", async (req, res) => {
     res.status(500).json({ mensaje: "Error al obtener los comentarios", error });
   }
 });
+// POST /api/comentarios/:id/like
+app.post('/api/comentarios/:id/like', async (req, res) => {
+  const { id } = req.params; // ID del comentario
+
+  try {
+    // Incrementar el contador de likes en la base de datos
+    const { data, error } = await supabase
+      .from('comentarios')
+      .update({ likes: supabase.raw('likes + 1') }) // Incrementa el campo likes
+      .eq('id', id)
+      .select();
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    res.status(200).json({ message: 'Like agregado correctamente.', data });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error al procesar el like.' });
+  }
+});
 
 app.get('/api/admin/comentarios', checkAuth, async (req, res) => {
   try {
@@ -181,6 +203,7 @@ app.put("/api/admin/comentarios/:id", checkAuth, async (req, res) => {
     res.status(500).json({ mensaje: "Error al actualizar el comentario", error });
   }
 });
+
 
 // Iniciar el servidor
 app.listen(port, () => {
